@@ -4,12 +4,15 @@ use axum::{
 };
 use tracing::{info, instrument};
 
+mod cli;
 mod error;
 mod slack;
 
 #[tokio::main]
 async fn main() -> error::Result<()> {
   tracing_subscriber::fmt::init();
+
+  let args = cli::parse();
 
   let app = Router::new()
     .route("/", get(root));

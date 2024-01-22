@@ -6,12 +6,13 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.79"
 axum = "0.7.4"
-clap = { version = "4.4", features = ["env"] }
-clap_derive = "4.4.7"
+dotenvy = "0.15.7"
+diesel_migrations = "2.1"
+diesel = { version = "2.1", features = ["postgres", "numeric", "chrono"] }
+clap = { version = "4", features = ["derive", "env"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde_json = "1.0.111"
 serde = { version = "1.0.195", features = ["derive"] }
-sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "macros", "migrate", "uuid", "chrono"] }
 tokio = { version = "1.35.1", features = ["full"] }
 
 # Logging
