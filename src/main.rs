@@ -1,15 +1,14 @@
 use axum::{
-  routing::{get, post},
-  http::StatusCode,
-  Json, Router,
+  routing::get,
+  Router
 };
-use serde::{Deserialize, Serialize};
 use tracing::{info, instrument};
 
+mod error;
 mod slack;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> error::Result<()> {
   tracing_subscriber::fmt::init();
 
   let app = Router::new()
@@ -22,5 +21,5 @@ async fn main() -> anyhow::Result<()> {
 
 #[instrument]
 async fn root() -> &'static str {
-  "Hello, World!"
+  "This is the song that never ends, it goes on and on my friends..."
 }
