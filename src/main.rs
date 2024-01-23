@@ -10,12 +10,15 @@ mod slack;
 
 #[tokio::main]
 async fn main() -> error::Result<()> {
+  let _ = dotenvy::dotenv();
+
   tracing_subscriber::fmt::init();
 
   let args = cli::parse();
 
   let app = Router::new()
-    .route("/", get(root));
+    .route("/", get(root))
+    .merge(slack::http::router());
 
   info!("Starting server: http://localhost:3000");
   let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
