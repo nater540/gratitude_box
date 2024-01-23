@@ -1,31 +1,21 @@
-use axum::{
-  routing::get,
-  Router
-};
-use tracing::{info, instrument};
+use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 
 mod cli;
 mod error;
 mod slack;
 
 #[tokio::main]
-async fn main() -> error::Result<()> {
+async fn main() -> anyhow::Result<()> {
   let _ = dotenvy::dotenv();
 
   tracing_subscriber::fmt::init();
 
   let args = cli::parse();
 
-  let app = Router::new()
-    .route("/", get(root))
-    .merge(slack::http::router());
-
-  info!("Starting server: http://localhost:3000");
-  let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
-  Ok(axum::serve(listener, app).await?)
-}
-
-#[instrument]
-async fn root() -> &'static str {
-  "This is the song that never ends, it goes on and on my friends..."
+  Ok(HttpServer::new(|| {
+    App::new().configure(slack::http::config)
+  })
+  .bind(("127.0.0.1", 3000))?
+  .run()
+  .await?)
 }

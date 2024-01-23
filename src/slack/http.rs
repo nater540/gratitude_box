@@ -1,10 +1,12 @@
-use axum::{Router, routing::post};
+use actix_web::web;
 
-pub fn router() -> Router {
-  async fn interaction() -> &'static str {
-    "This is the song that never ends, it goes on and on my friends..."
-  }
+mod events;
 
-  Router::new()
-    .route("/slack/interaction", post(interaction))
+pub fn config(cfg: &mut web::ServiceConfig) {
+  cfg.service(
+    web::scope("/slack/{team_id}")
+      .service(
+        web::resource("events").route(web::post().to(events::handler))
+      )
+  );
 }

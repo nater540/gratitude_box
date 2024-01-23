@@ -1,27 +1,24 @@
 pub mod responses;
 pub mod http;
 
-use crate::error::Result;
+// use serde::{Deserialize, Deserializer};
+// use chrono::{DateTime, Utc, TimeZone};
+// use std::str::FromStr;
 
-use serde::{Deserialize, Deserializer};
-use chrono::{DateTime, Utc, TimeZone};
-use std::str::FromStr;
-use anyhow::anyhow;
+// pub fn slack_timestamp_deserializer<'de, D>(deserializer: D) -> anyhow::Result<DateTime<Utc>>
+//   where D: Deserializer<'de> {
+//     let s = String::deserialize(deserializer)?;
+//     let parts: Vec<&str> = s.split('.').collect();
 
-pub fn slack_timestamp_deserializer<'de, D>(deserializer: D) -> Result<DateTime<Utc>>
-  where D: Deserializer<'de> {
-    let s = String::deserialize(deserializer)?;
-    let parts: Vec<&str> = s.split('.').collect();
+//     if parts.len() == 2 {
+//       let seconds = i64::from_str(parts[0]).map_err(serde::de::Error::custom)?;
+//       let nanoseconds = u32::from_str(parts[1]).map_err(serde::de::Error::custom)? * 1_000;
 
-    if parts.len() == 2 {
-      let seconds = i64::from_str(parts[0]).map_err(serde::de::Error::custom)?;
-      let nanoseconds = u32::from_str(parts[1]).map_err(serde::de::Error::custom)? * 1_000;
-
-      match Utc.timestamp_opt(seconds, nanoseconds) {
-        chrono::LocalResult::Single(datetime) => Ok(datetime),
-        _ => Err(serde::de::Error::custom("Invalid timestamp")),
-      }
-    } else {
-      Err(anyhow!("Invalid timestamp format"))
-    }
-}
+//       match Utc.timestamp_opt(seconds, nanoseconds) {
+//         chrono::LocalResult::Single(datetime) => Ok(datetime),
+//         _ => Err(serde::de::Error::custom("Invalid timestamp")),
+//       }
+//     } else {
+//       Err(serde::de::Error::custom("Invalid timestamp format"))
+//     }
+// }

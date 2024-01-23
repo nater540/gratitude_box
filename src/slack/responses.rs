@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::error;
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SlackResponse {
   pub token: String,
@@ -13,7 +11,7 @@ pub struct SlackResponse {
   pub event_type: String,
   pub event_id: String,
   pub event_time: i64,
-  pub authed_users: Vec<String>
+  pub authed_users: Option<Vec<String>>
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -36,7 +34,7 @@ pub struct ReactionItem {
 }
 
 impl SlackResponse {
-  fn parse_event<T: for<'de> Deserialize<'de>>(&self) -> error::Result<T> {
+  pub fn parse_event<T: for<'de> Deserialize<'de>>(&self) -> anyhow::Result<T> {
     serde_json::from_value(self.event.clone()).map_err(Into::into)
   }
 }
