@@ -75,10 +75,37 @@ pub fn find_by_id(conn: &mut PgConnection, id: Uuid) -> Result<User> {
   Ok(users::table.filter(users::id.eq(id)).first::<User>(conn)?)
 }
 
+/// Finds or creates a new user record, then sets their points to the provided value.
+///
+/// # Parameters
+/// - `conn`: Mutable reference to the PG connection.
+/// - `slack_id`: The Slack ID for the user.
+/// - `slack_team_id`: The Slack Team ID for the user.
+/// - `points`: The number of points to set for the user.
+///
+/// # Returns
+/// This returns a `Result<User>` that contains the updated user record, if the save was successful.
 pub fn set_points<'a, T>(conn: &mut PgConnection, slack_id: T, slack_team_id: T, points: i32) -> Result<User>
   where T: Into<Cow<'a, str>> {
   let mut user = find_or_create(conn, slack_id, slack_team_id)?;
   user.points = points;
+  Ok(user.save(conn)?)
+}
+
+/// Finds or creates a new user record, then adds the provided number of points to their existing total.
+///
+/// # Parameters
+/// - `conn`: Mutable reference to the PG connection.
+/// - `slack_id`: The Slack ID for the user.
+/// - `slack_team_id`: The Slack Team ID for the user.
+/// - `points`: The number of points to add to the user's existing total.
+///
+/// # Returns
+/// This returns a `Result<User>` that contains the updated user record, if the save was successful.
+pub fn add_points<'a, T>(conn: &mut PgConnection, slack_id: T, slack_team_id: T, points: i32) -> Result<User>
+  where T: Into<Cow<'a, str>> {
+  let mut user = find_or_create(conn, slack_id, slack_team_id)?;
+  user.points += points;
   Ok(user.save(conn)?)
 }
 
@@ -156,6 +183,19 @@ mod tests {
     let existing_user = create_test_user(&mut conn, None, None);
     let updated_user = set_points(&mut conn, existing_user.slack_id, existing_user.slack_team_id, 1000).unwrap();
 
+    assert_eq!(updated_user.id, existing_user.id);
+    assert_eq!(updated_user.points, 1000);
+  }
+
+  #[test]
+  fn test_add_points() {
+    let mut conn = crate::db::test_connection();
+
+    let mut existing_user = create_test_user(&mut conn, None, None);
+    existing_user.points = 900;
+    let existing_user = existing_user.save(&mut conn).unwrap();
+
+    let updated_user = add_points(&mut conn, existing_user.slack_id, existing_user.slack_team_id, 100).unwrap();
     assert_eq!(updated_user.id, existing_user.id);
     assert_eq!(updated_user.points, 1000);
   }
