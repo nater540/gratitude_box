@@ -1,5 +1,6 @@
-use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{middleware, App, HttpServer};
 
+mod db;
 mod cli;
 mod error;
 mod slack;

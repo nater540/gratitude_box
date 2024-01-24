@@ -4,14 +4,12 @@ use serde::{Deserialize, Serialize};
 pub struct SlackResponse {
   pub token: String,
   pub team_id: String,
-  pub api_app_id: String,
   pub event: serde_json::Value,
 
   #[serde(rename = "type")]
   pub event_type: String,
   pub event_id: String,
-  pub event_time: i64,
-  pub authed_users: Option<Vec<String>>
+  pub event_time: i64
 }
 
 #[derive(Debug, Deserialize, Serialize)]

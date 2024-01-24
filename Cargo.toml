@@ -9,13 +9,14 @@ actix-web = "4"
 chrono = { version = "0.4.32", features = ["serde"] }
 dotenvy = "0.15.7"
 diesel_migrations = "2.1"
-diesel = { version = "2.1", features = ["postgres", "numeric", "chrono"] }
+diesel = { version = "2.1", features = ["postgres", "numeric", "chrono", "uuid"] }
 clap = { version = "4", features = ["derive", "env"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde_json = "1.0.111"
 serde = { version = "1.0.195", features = ["derive"] }
 tokio = { version = "1.35.1", features = ["full"] }
 thiserror = "1.0"
+uuid = "1.7.0"
 
 # Logging
 tracing = "0.1.40"
