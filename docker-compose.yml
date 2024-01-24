@@ -1,0 +1,36 @@
+version: '3.8'
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/usr/src/app
+
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: gratitude_box
+      POSTGRES_USER: gratitude
+      POSTGRES_PASSWORD: daww_thanks!
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
