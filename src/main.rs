@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, web, middleware::Logger};
 
 mod db;
 mod cli;
@@ -12,14 +12,14 @@ async fn main() -> anyhow::Result<()> {
   tracing_subscriber::fmt::init();
 
   let args = cli::parse();
-
   let db_pool = db::create_pool(&args)?;
 
-  let address = format!("{}:{}", args.http_host, args.http_port);
-  tracing::debug!("Starting server on {}", address);
-
-  Ok(HttpServer::new(|| {
-    App::new().configure(slack::http::config)
+  tracing::debug!("Starting server on {}:{}", args.http_host, args.http_port);
+  Ok(HttpServer::new(move || {
+    App::new()
+      .wrap(Logger::default())
+      .app_data(web::Data::new(db_pool.clone()))
+      .configure(slack::http::config)
   })
   .bind((args.http_host, args.http_port))?
   .run()

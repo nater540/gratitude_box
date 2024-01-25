@@ -8,12 +8,11 @@ anyhow = "1.0"
 actix-web = "4"
 chrono = { version = "0.4", features = ["serde"] }
 dotenvy = "0.15"
-diesel_migrations = "2.1"
-diesel = { version = "2.1", features = ["postgres", "numeric", "chrono", "uuid"] }
 clap = { version = "4", features = ["derive", "env"] }
 redis = { version = "0.24", features = ["tokio-comp"] }
 reqwest = { version = "0.11", features = ["json"] }
 ring = "0.17"
+sea-orm = { version = "0.12.12", features = ["with-json", "with-chrono", "with-uuid", "sqlx-postgres", "postgres-array", "runtime-tokio-native-tls", "macros"] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.35", features = ["full"] }
@@ -23,7 +22,6 @@ uuid = "1.7"
 # Connection pools
 deadpool = { version = "0.10", features = ["rt_tokio_1"] }
 deadpool-redis = { version = "0.14", features = ["serde"] }
-deadpool-diesel = { version = "0.5", features = ["postgres", "serde", "tracing"] }
 
 # Logging
 tracing = "0.1"

@@ -5,6 +5,8 @@ use anyhow::Result;
 pub mod schema;
 pub mod models;
 
+pub type DbPool = Pool;
+
 #[cfg(test)]
 mod test_helpers;
 
@@ -20,6 +22,7 @@ use test_helpers::connection as test_connection;
 /// Returns a `Result<Pool>` containing the database pool if successful.
 pub fn create_pool(args: &crate::cli::Args) -> Result<Pool> {
   let database_url = if args.db_user.is_none() || args.db_pass.is_none() {
+    tracing::debug!("Connecting to database without authentication");
     format!(
       "postgres://{}:{}/{}",
       args.db_host,
@@ -27,6 +30,7 @@ pub fn create_pool(args: &crate::cli::Args) -> Result<Pool> {
       args.db_name
     )
   } else {
+    tracing::debug!("Connecting to database with authentication");
     format!(
       "postgres://{}:{}@{}:{}/{}",
       args.db_user.as_ref().unwrap(),
@@ -38,6 +42,5 @@ pub fn create_pool(args: &crate::cli::Args) -> Result<Pool> {
   };
 
   let manager = Manager::new(database_url, Runtime::Tokio1);
-  let pool = Pool::builder(manager).max_size(args.db_pool).build()?;
-  Ok(pool)
+  Ok(Pool::builder(manager).max_size(args.db_pool).build()?)
 }
