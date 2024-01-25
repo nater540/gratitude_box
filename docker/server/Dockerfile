@@ -25,6 +25,6 @@ RUN cargo build --release
 # Run image
 #############################################
 FROM alpine:3.19 as run
-RUN apk add --no-cache ca-certificates tzdata && update-ca-certificates
+RUN apk add --no-cache ca-certificates openssl
 COPY --from=builder /usr/src/app/target/release/gratitude_box /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/gratitude_box"]

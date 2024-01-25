@@ -18,7 +18,9 @@ services:
       - .:/usr/src/app
 
   db:
-    image: postgres:latest
+    build:
+      context: .
+      dockerfile: docker/pg/Dockerfile
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -29,7 +31,9 @@ services:
       - "5432:5432"
 
   redis:
-    image: redis:latest
+    build:
+      context: .
+      dockerfile: docker/redis/Dockerfile
     volumes:
       - redis_data:/data
     ports:
