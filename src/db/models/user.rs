@@ -87,9 +87,11 @@ pub fn find_by_id(conn: &mut PgConnection, id: Uuid) -> Result<User> {
 /// This returns a `Result<User>` that contains the updated user record, if the save was successful.
 pub fn set_points<'a, T>(conn: &mut PgConnection, slack_id: T, slack_team_id: T, points: i32) -> Result<User>
   where T: Into<Cow<'a, str>> {
-  let mut user = find_or_create(conn, slack_id, slack_team_id)?;
-  user.points = points;
-  Ok(user.save(conn)?)
+  conn.transaction::<_, anyhow::Error, _>(|conn| {
+    let mut user = find_or_create(conn, slack_id, slack_team_id)?;
+    user.points = points;
+    Ok(user.save(conn)?)
+  })
 }
 
 /// Finds or creates a new user record, then adds the provided number of points to their existing total.
@@ -104,9 +106,31 @@ pub fn set_points<'a, T>(conn: &mut PgConnection, slack_id: T, slack_team_id: T,
 /// This returns a `Result<User>` that contains the updated user record, if the save was successful.
 pub fn add_points<'a, T>(conn: &mut PgConnection, slack_id: T, slack_team_id: T, points: i32) -> Result<User>
   where T: Into<Cow<'a, str>> {
-  let mut user = find_or_create(conn, slack_id, slack_team_id)?;
-  user.points += points;
-  Ok(user.save(conn)?)
+  conn.transaction::<_, anyhow::Error, _>(|conn| {
+    let mut user = find_or_create(conn, slack_id, slack_team_id)?;
+    user.points += points;
+    Ok(user.save(conn)?)
+  })
+}
+
+/// Finds or creates a new user record, then tries to subtract the provided number of points.
+/// This also clamps the point value so that it cannot go below zero.
+///
+/// # Parameters
+/// - `conn`: Mutable reference to the PG connection.
+/// - `slack_id`: The Slack ID for the user.
+/// - `slack_team_id`: The Slack Team ID for the user.
+/// - `points`: The number of points to remove to the user's existing total.
+///
+/// # Returns
+/// This returns a `Result<User>` that contains the updated user record, if the save was successful.
+pub fn subtract_points<'a, T>(conn: &mut PgConnection, slack_id: T, slack_team_id: T, points: i32) -> Result<User>
+  where T: Into<Cow<'a, str>> {
+  conn.transaction::<_, anyhow::Error, _>(|conn| {
+    let mut user = find_or_create(conn, slack_id, slack_team_id)?;
+    user.points = (user.points - points).clamp(0, i32::MAX);
+    Ok(user.save(conn)?)
+  })
 }
 
 /// Contains helper functions for modifying existing user records.
@@ -119,7 +143,9 @@ impl User {
   /// # Returns
   /// This returns a `Result<User>` that contains the updated user record, if the save was successful.
   pub fn save(&self, conn: &mut PgConnection) -> Result<User> {
-    Ok(diesel::update(users::table).set(self).get_result::<User>(conn)?)
+    conn.transaction::<_, anyhow::Error, _>(|conn| {
+      Ok(diesel::update(users::table).set(self).get_result::<User>(conn)?)
+    })
   }
 }
 
@@ -198,6 +224,32 @@ mod tests {
     let updated_user = add_points(&mut conn, existing_user.slack_id, existing_user.slack_team_id, 100).unwrap();
     assert_eq!(updated_user.id, existing_user.id);
     assert_eq!(updated_user.points, 1000);
+  }
+
+  #[test]
+  fn test_subtract_points() {
+    let mut conn = crate::db::test_connection();
+
+    let mut existing_user = create_test_user(&mut conn, None, None);
+    existing_user.points = 900;
+    let existing_user = existing_user.save(&mut conn).unwrap();
+
+    let updated_user = subtract_points(&mut conn, existing_user.slack_id, existing_user.slack_team_id, 800).unwrap();
+    assert_eq!(updated_user.id, existing_user.id);
+    assert_eq!(updated_user.points, 100);
+  }
+
+  #[test]
+  fn test_subtract_points_clamp() {
+    let mut conn = crate::db::test_connection();
+
+    let mut existing_user = create_test_user(&mut conn, None, None);
+    existing_user.points = 10;
+    let existing_user = existing_user.save(&mut conn).unwrap();
+
+    let updated_user = subtract_points(&mut conn, existing_user.slack_id, existing_user.slack_team_id, 420).unwrap();
+    assert_eq!(updated_user.id, existing_user.id);
+    assert_eq!(updated_user.points, 0);
   }
 
   #[test]

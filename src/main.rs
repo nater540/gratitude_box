@@ -1,4 +1,4 @@
-use actix_web::{middleware, App, HttpServer};
+use actix_web::{App, HttpServer};
 
 mod db;
 mod cli;
@@ -13,10 +13,15 @@ async fn main() -> anyhow::Result<()> {
 
   let args = cli::parse();
 
+  let db_pool = db::create_pool(&args)?;
+
+  let address = format!("{}:{}", args.http_host, args.http_port);
+  tracing::debug!("Starting server on {}", address);
+
   Ok(HttpServer::new(|| {
     App::new().configure(slack::http::config)
   })
-  .bind(("127.0.0.1", 3000))?
+  .bind((args.http_host, args.http_port))?
   .run()
   .await?)
 }

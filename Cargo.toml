@@ -4,20 +4,27 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.79"
+anyhow = "1.0"
 actix-web = "4"
-chrono = { version = "0.4.32", features = ["serde"] }
-dotenvy = "0.15.7"
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15"
 diesel_migrations = "2.1"
 diesel = { version = "2.1", features = ["postgres", "numeric", "chrono", "uuid"] }
 clap = { version = "4", features = ["derive", "env"] }
+redis = { version = "0.24", features = ["tokio-comp"] }
 reqwest = { version = "0.11", features = ["json"] }
-serde_json = "1.0.111"
-serde = { version = "1.0.195", features = ["derive"] }
-tokio = { version = "1.35.1", features = ["full"] }
+ring = "0.17"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.35", features = ["full"] }
 thiserror = "1.0"
-uuid = "1.7.0"
+uuid = "1.7"
+
+# Connection pools
+deadpool = { version = "0.10", features = ["rt_tokio_1"] }
+deadpool-redis = { version = "0.14", features = ["serde"] }
+deadpool-diesel = { version = "0.5", features = ["postgres", "serde", "tracing"] }
 
 # Logging
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+tracing = "0.1"
+tracing-subscriber = "0.3"
