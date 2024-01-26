@@ -1,17 +1,10 @@
-use deadpool_diesel::postgres::{Manager, Pool};
-use deadpool_diesel::Runtime;
+use sea_orm::{Database, DatabaseConnection};
+use migration::{Migrator, MigratorTrait};
 use anyhow::Result;
 
-pub mod schema;
 pub mod models;
 
-pub type DbPool = Pool;
-
-#[cfg(test)]
-mod test_helpers;
-
-#[cfg(test)]
-use test_helpers::connection as test_connection;
+pub type DbPool = DatabaseConnection;
 
 /// Creates the shared postgres database pool.
 ///
@@ -19,8 +12,8 @@ use test_helpers::connection as test_connection;
 /// - `args`: The command line arguments.
 ///
 /// # Returns
-/// Returns a `Result<Pool>` containing the database pool if successful.
-pub fn create_pool(args: &crate::cli::Args) -> Result<Pool> {
+/// Returns a `Result<DbPool>` containing the database pool if successful.
+pub async fn create_pool(args: &crate::cli::Args) -> Result<DbPool> {
   let database_url = if args.db_user.is_none() || args.db_pass.is_none() {
     tracing::debug!("Connecting to database without authentication");
     format!(
@@ -41,6 +34,8 @@ pub fn create_pool(args: &crate::cli::Args) -> Result<Pool> {
     )
   };
 
-  let manager = Manager::new(database_url, Runtime::Tokio1);
-  Ok(Pool::builder(manager).max_size(args.db_pool).build()?)
+  let conn = Database::connect(&database_url).await?;
+  tracing::debug!("Running migrations...");
+  Migrator::up(&conn, None).await?;
+  Ok(conn)
 }

@@ -17,7 +17,7 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.35", features = ["full"] }
 thiserror = "1.0"
-uuid = "1.7"
+uuid = { version = "1.7", features = ["v4"] }
 
 # Connection pools
 deadpool = { version = "0.10", features = ["rt_tokio_1"] }
@@ -26,3 +26,5 @@ deadpool-redis = { version = "0.14", features = ["serde"] }
 # Logging
 tracing = "0.1"
 tracing-subscriber = "0.3"
+
+migration = { path = "migration" }

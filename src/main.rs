@@ -9,12 +9,15 @@ mod slack;
 async fn main() -> anyhow::Result<()> {
   let _ = dotenvy::dotenv();
 
-  tracing_subscriber::fmt::init();
+  tracing_subscriber::fmt()
+    .with_max_level(tracing::Level::DEBUG)
+    .with_test_writer()
+    .init();
 
   let args = cli::parse();
-  let db_pool = db::create_pool(&args)?;
+  let db_pool = db::create_pool(&args).await?;
 
-  tracing::debug!("Starting server on {}:{}", args.http_host, args.http_port);
+  tracing::info!("Starting server on {}:{}", args.http_host, args.http_port);
   Ok(HttpServer::new(move || {
     App::new()
       .wrap(Logger::default())

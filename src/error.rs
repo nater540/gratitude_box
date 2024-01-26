@@ -6,19 +6,22 @@ pub enum GBError {
   #[error("Internal error")]
   InternalError(#[from] anyhow::Error),
 
-  #[error("Database connection error")]
-  DatabaseConnectionError(#[from] deadpool_diesel::PoolError)
+  #[error("Database error")]
+  DatabaseError(#[from] sea_orm::DbErr)
 }
 
 impl ResponseError for GBError {
   fn error_response(&self) -> HttpResponse {
-    match *self {
-      GBError::InternalError(ref _e) => {
-        HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)
-      },
-      GBError::DatabaseConnectionError(ref _e) => {
-        HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)
-      }
-    }
+    let status_code = match *self {
+      GBError::InternalError(ref _e) => StatusCode::INTERNAL_SERVER_ERROR,
+      _ => StatusCode::INTERNAL_SERVER_ERROR
+    };
+
+    let error_message = serde_json::json!({
+      "error": self.to_string(),
+      "status_code": status_code.as_u16(),
+    });
+
+    HttpResponse::build(status_code).json(error_message)
   }
 }

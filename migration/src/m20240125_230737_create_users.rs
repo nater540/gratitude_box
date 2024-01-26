@@ -6,6 +6,9 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
   async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    let db = manager.get_connection();
+    db.execute_unprepared("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").await?;
+
     manager
       .create_table(
         Table::create()
@@ -18,7 +21,16 @@ impl MigrationTrait for Migration {
           .col(ColumnDef::new(User::Points).integer().not_null().default("0"))
           .to_owned()
       )
-      .await
+      .await?;
+
+      manager.create_index(sea_query::Index::create()
+        .if_not_exists()
+        .table(User::Table)
+        .name("idx_user_slack_id")
+        .col(User::SlackId)
+        .col(User::SlackTeamId)
+        .to_owned()
+      ).await
   }
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
