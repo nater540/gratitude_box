@@ -12,14 +12,18 @@ pub enum GBError {
 
 impl ResponseError for GBError {
   fn error_response(&self) -> HttpResponse {
-    let status_code = match *self {
-      GBError::InternalError(ref _e) => StatusCode::INTERNAL_SERVER_ERROR,
-      _ => StatusCode::INTERNAL_SERVER_ERROR
+    let (status_code, details) = match *self {
+      GBError::InternalError(ref err) => {
+        (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
+      },
+      GBError::DatabaseError(ref err) => {
+        (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
+      }
     };
 
     let error_message = serde_json::json!({
       "error": self.to_string(),
-      "status_code": status_code.as_u16(),
+      "details": details
     });
 
     HttpResponse::build(status_code).json(error_message)

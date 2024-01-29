@@ -1,6 +1,12 @@
-use sea_orm::{Database, DatabaseConnection};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use migration::{Migrator, MigratorTrait};
 use anyhow::Result;
+
+#[cfg(test)]
+pub mod test_helpers;
+
+#[cfg(test)]
+pub use test_helpers::*;
 
 pub mod models;
 
@@ -34,7 +40,11 @@ pub async fn create_pool(args: &crate::cli::Args) -> Result<DbPool> {
     )
   };
 
-  let conn = Database::connect(&database_url).await?;
+  let mut opts = ConnectOptions::new(&database_url);
+  opts.min_connections(args.db_pool_min)
+      .max_connections(args.db_pool_max);
+
+  let conn = Database::connect(opts).await?;
   tracing::debug!("Running migrations...");
   Migrator::up(&conn, None).await?;
   Ok(conn)

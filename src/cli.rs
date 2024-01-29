@@ -18,8 +18,11 @@ pub struct Args {
   #[arg(long = "db-name", env = "GB_DB_NAME")]
   pub db_name: String,
 
-  #[arg(long = "db-pool", env = "GB_DB_POOL", default_value = "8")]
-  pub db_pool: usize,
+  #[arg(long = "db-pool-min", env = "GB_DB_POOL_MIN", default_value = "8")]
+  pub db_pool_min: u32,
+
+  #[arg(long = "db-pool-max", env = "GB_DB_POOL_MAX", default_value = "10")]
+  pub db_pool_max: u32,
 
   #[arg(long = "http-host", env = "GB_HTTP_HOST", default_value = "0.0.0.0")]
   pub http_host: String,
