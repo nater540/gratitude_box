@@ -1,5 +1,8 @@
 pub mod responses;
+pub mod signature;
 pub mod http;
+
+pub use http::headers;
 
 // use serde::{Deserialize, Deserializer};
 // use chrono::{DateTime, Utc, TimeZone};

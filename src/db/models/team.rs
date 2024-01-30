@@ -8,6 +8,7 @@ pub struct Model {
   pub id: Uuid,
   pub slack_id: String,
   pub api_key: String,
+  pub signing_secret: String,
   pub updated_at: DateTime
 }
 

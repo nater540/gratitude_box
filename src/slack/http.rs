@@ -10,3 +10,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
       )
   );
 }
+
+pub mod headers {
+  pub const SLACK_SIGNATURE_HEADER: &str = "x-slack-signature";
+  pub const SLACK_REQUEST_TIMESTAMP_HEADER: &str = "x-slack-request-timestamp";
+}

@@ -12,12 +12,15 @@ clap = { version = "4", features = ["derive", "env"] }
 redis = { version = "0.24", features = ["tokio-comp"] }
 reqwest = { version = "0.11", features = ["json"] }
 ring = "0.17"
-sea-orm = { version = "0.12.12", features = ["with-json", "with-chrono", "with-uuid", "sqlx-postgres", "postgres-array", "runtime-tokio-native-tls", "macros"] }
+sea-orm = { version = "0.12", features = ["with-json", "with-chrono", "with-uuid", "sqlx-postgres", "postgres-array", "runtime-tokio-native-tls", "macros"] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.35", features = ["full"] }
 thiserror = "1.0"
 uuid = { version = "1.7", features = ["v4"] }
+hmac = "0.12"
+sha2 = "0.10"
+faster-hex = "0.9"
 
 # Connection pools
 deadpool = { version = "0.10", features = ["rt_tokio_1"] }

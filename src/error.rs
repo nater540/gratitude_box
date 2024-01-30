@@ -7,7 +7,10 @@ pub enum GBError {
   InternalError(#[from] anyhow::Error),
 
   #[error("Database error")]
-  DatabaseError(#[from] sea_orm::DbErr)
+  DatabaseError(#[from] sea_orm::DbErr),
+
+  #[error("Missing Slack header")]
+  SlackSignatureFailure
 }
 
 impl ResponseError for GBError {
@@ -18,6 +21,9 @@ impl ResponseError for GBError {
       },
       GBError::DatabaseError(ref err) => {
         (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
+      },
+      GBError::SlackSignatureFailure => {
+        (StatusCode::BAD_REQUEST, "Failed to verify request signature".to_string())
       }
     };
 
