@@ -1,0 +1,25 @@
+WHITESPACE = _{ " " | "\t" }
+
+newline           = _{ "\n" | "\r\n" }
+ignored_text      = _{ (!point_award ~ ANY)+ }
+
+// Mention parsing
+user_id           =  { "@" ~ ASCII_ALPHANUMERIC+ }
+special_mention   =  { "!here" }
+mention_target    =  { user_id | special_mention }
+mention           =  { "<" ~ mention_target ~ ">" }
+operator          =  { "++" | "--" }
+
+// Reason parsing is a bit more complex, I'm still fiddling with this..
+punctuation       =  { "." | "!" | "?" | ";" | ":" }
+reason_characters =  { !(mention | operator | newline | punctuation) ~ ANY }
+reason            =  { reason_characters{0, 128} }
+
+// Point parsing
+points            =  { ASCII_DIGIT{1, 3} }
+point_award       =  {
+  mention ~ operator ~ (points ~ WHITESPACE+ ~ reason? | points ~ reason? | reason?)?
+}
+
+// This is the final rule, and what we'll attempt to parse from the input
+message           =  { (point_award | ignored_text)+ }

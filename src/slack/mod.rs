@@ -1,8 +1,11 @@
-pub mod responses;
 pub mod signature;
+pub mod messages;
+pub mod client;
 pub mod http;
+pub mod verification_middleware;
 
 pub use http::headers;
+pub use verification_middleware::VerificationMiddleware;
 
 // use serde::{Deserialize, Deserializer};
 // use chrono::{DateTime, Utc, TimeZone};

@@ -1,5 +1,4 @@
-# Gratitude Box
-
+# Trophy Trunk
 
 ## TODO
 - Add redis for caching

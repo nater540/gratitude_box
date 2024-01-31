@@ -1,16 +1,25 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpRequest, HttpResponse};
 use sea_orm::*;
 
 use crate::db::{DbPool, models::*};
-use crate::slack::responses::*;
+use crate::slack::messages::*;
 use crate::error::GBError;
 use crate::http::AppState;
 
-pub async fn handler(state: web::Data<AppState>, message: web::Json<SlackResponse>) -> Result<HttpResponse, GBError> {
+pub async fn handler(req: HttpRequest, state: web::Data<AppState>, message: web::Json<SlackMessage>) -> Result<HttpResponse, GBError> {
   let message = message.into_inner();
   // let pool = pool.into_inner();
 
-  // let reaction_event = message.parse_event::<ReactionEvent>()?;
+  // TODO: Should be a better way to handle this, since I think slack sends
+  // a challenge message for each configured event / command / etc..
+  match message {
+    SlackMessage::UrlVerification { challenge, .. } => {
+      return Ok(HttpResponse::Ok().body(challenge));
+    },
+    _ => {
+      dbg!(message);
+    }
+  }
 
   // let new_user = user::ActiveModel {
   //   slack_id: Set(reaction_event.user.clone()),
@@ -22,3 +31,5 @@ pub async fn handler(state: web::Data<AppState>, message: web::Json<SlackRespons
 
   Ok(HttpResponse::Ok().finish())
 }
+
+// f269a8e79edce0adcc3fb7be9c1dc3fa

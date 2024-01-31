@@ -1,3 +1,5 @@
+workspace = { members = ["parser", "migration"] }
+
 [package]
 name = "gratitude_box"
 version = "0.1.0"
@@ -21,6 +23,7 @@ uuid = { version = "1.7", features = ["v4"] }
 hmac = "0.12"
 sha2 = "0.10"
 faster-hex = "0.9"
+futures-util = "^0.3"
 
 # Connection pools
 deadpool = { version = "0.10", features = ["rt_tokio_1"] }
@@ -31,3 +34,4 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 
 migration = { path = "migration" }
+parser = { path = "parser" }

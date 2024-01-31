@@ -61,4 +61,10 @@ mod tests {
     let signature = test_signature(TEST_BODY, TEST_TIMESTAMP, TEST_SHA_KEY);
     assert!(verify_signature(TEST_BODY, TEST_TIMESTAMP, &signature, "oops_fake_key").is_err());
   }
+
+  #[test]
+  fn test_verify_signature_wrong_timestamp() {
+    let signature = test_signature(TEST_BODY, TEST_TIMESTAMP, TEST_SHA_KEY);
+    assert!(verify_signature(TEST_BODY, "1531420420", &signature, TEST_SHA_KEY).is_err());
+  }
 }

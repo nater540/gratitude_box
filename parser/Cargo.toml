@@ -1,0 +1,9 @@
+[package]
+name = "parser"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+pest = "2.7"
+pest_derive = "2.7"
+thiserror = "1.0"

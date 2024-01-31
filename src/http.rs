@@ -3,6 +3,8 @@ use sea_orm::{Database, DatabaseConnection};
 use std::sync::Arc;
 use anyhow::Result;
 
+use crate::slack::VerificationMiddleware;
+
 #[derive(Debug, Clone)]
 pub struct AppState {
   pub db: DatabaseConnection
@@ -16,6 +18,7 @@ pub async fn start(args: &crate::cli::Args, db: DatabaseConnection) -> Result<()
   HttpServer::new(move || {
     App::new()
       .wrap(Logger::default())
+      .wrap(VerificationMiddleware)
       .app_data(web::Data::new(state.clone()))
       .configure(crate::slack::http::config)
   })
