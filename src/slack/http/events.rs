@@ -31,5 +31,3 @@ pub async fn handler(req: HttpRequest, state: web::Data<AppState>, message: web:
 
   Ok(HttpResponse::Ok().finish())
 }
-
-// f269a8e79edce0adcc3fb7be9c1dc3fa

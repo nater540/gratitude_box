@@ -15,17 +15,6 @@ pub enum SlackMessage {
   }
 }
 
-// pub struct SlackMessage {
-//   pub token: String,
-//   pub team_id: String,
-//   pub event: serde_json::Value,
-
-//   #[serde(rename = "type")]
-//   pub event_type: String,
-//   pub event_id: String,
-//   pub event_time: i64
-// }
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ReactionEvent {
   #[serde(rename = "type")]
@@ -44,9 +33,3 @@ pub struct ReactionItem {
   pub channel: String,
   pub ts: String
 }
-
-// impl SlackMessage {
-//   pub fn parse_event<T: for<'de> Deserialize<'de>>(&self) -> anyhow::Result<T> {
-//     serde_json::from_value(self.event.clone()).map_err(Into::into)
-//   }
-// }

@@ -4,9 +4,10 @@ newline           = _{ "\n" | "\r\n" }
 ignored_text      = _{ (!point_award ~ ANY)+ }
 
 // Mention parsing
-user_id           =  { "@" ~ ASCII_ALPHANUMERIC+ }
-special_mention   =  { "!here" }
-mention_target    =  { user_id | special_mention }
+user_mention      =  { "@U" ~ ASCII_ALPHANUMERIC+ }
+channel_mention   =  { "@C" ~ ASCII_ALPHANUMERIC+ }
+here_mention      =  { "!here" }
+mention_target    =  { user_mention | channel_mention | here_mention }
 mention           =  { "<" ~ mention_target ~ ">" }
 operator          =  { "++" | "--" }
 

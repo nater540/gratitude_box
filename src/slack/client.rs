@@ -1,13 +1,18 @@
 use serde::{de::DeserializeOwned, Serialize};
 use std::borrow::Cow;
 
+pub mod chat;
+
 #[derive(thiserror::Error, Debug)]
 pub enum ClientError {
-  #[error("failed to build client ({0})")]
+  #[error("failed to build ({0})")]
   BuilderError(String),
 
   #[error("failed to send request")]
   ReqwestError(#[from] reqwest::Error),
+
+  #[error("request failed with status code {0}")]
+  RequestFailed(reqwest::StatusCode),
 
   #[error("invalid request header")]
   InvalidRequestHeader(#[from] reqwest::header::InvalidHeaderValue),
@@ -20,12 +25,13 @@ pub type Result<T, E = ClientError> = std::result::Result<T, E>;
 
 #[derive(Debug)]
 pub struct ClientBuilder<'a> {
-  token: Option<Cow<'a, str>>
+  token: Option<Cow<'a, str>>,
+  base_url: Option<Cow<'a, str>>
 }
 
 impl<'a> Default for ClientBuilder<'a> {
   fn default() -> ClientBuilder<'a> {
-    Self { token: None }
+    Self { token: None, base_url: Some(Cow::Borrowed("https://slack.com/api")) }
   }
 }
 
@@ -42,6 +48,13 @@ impl<'a> ClientBuilder<'a> {
     self
   }
 
+  #[inline]
+  pub fn base_url<S>(&mut self, base_url: S) -> &mut Self
+    where S: Into<Cow<'a, str>> {
+    self.base_url = Some(base_url.into());
+    self
+  }
+
   /// Consumes the builder & creates a new client.
   pub fn create(&self) -> Result<Client> {
     use reqwest::header::{HeaderValue, HeaderMap, AUTHORIZATION};
@@ -49,6 +62,11 @@ impl<'a> ClientBuilder<'a> {
     let token = match self.token {
       Some(ref tok) => tok.to_owned().to_string(),
       None          => return Err(ClientError::BuilderError("Must specify `token`".to_string()))
+    };
+
+    let base_url = match self.base_url {
+      Some(ref url) => url.to_owned().to_string(),
+      None          => return Err(ClientError::BuilderError("Must specify `base_url`".to_string()))
     };
 
     // Add the AUTHORIZATION header and mark it as sensitive so it doesn't get logged
@@ -62,25 +80,34 @@ impl<'a> ClientBuilder<'a> {
       .default_headers(headers)
       .build()?;
 
-    Ok(Client { token, client })
+    Ok(Client { token, base_url, client })
   }
 }
 
 #[derive(Debug)]
 pub struct Client {
   token: String, // TODO: I don't _think_ we need this, but I'm keeping it around in case we need to reestablish the connection
+  base_url: String,
   client: reqwest::Client
 }
 
 impl Client {
-  async fn post<P: Serialize>(&self, url: &str, params: P) -> Result<reqwest::Response> {
-    Ok(
-      self
-        .client
-        .post(url)
-        .json(&params)
-        .send()
-        .await?
-    )
+  pub(crate) async fn post<B, R>(&self, url: &str, body: B) -> Result<R>
+  where B: Serialize + Send + Sync,
+        R: DeserializeOwned + Send {
+    let response = self
+      .client
+      .post(url)
+      .json(&body)
+      .send()
+      .await?;
+
+    if !response.status().is_success() {
+      return Err(ClientError::RequestFailed(
+        reqwest::StatusCode::from(response.status())
+      ));
+    }
+
+    Ok(response.json::<R>().await?)
   }
 }
