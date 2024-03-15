@@ -5,14 +5,15 @@ use uuid::Uuid;
 use crate::db::DbPool;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "user")]
+#[sea_orm(table_name = "users")]
 pub struct Model {
   #[sea_orm(primary_key, auto_increment = false)]
   pub id: Uuid,
+  pub team_id: Uuid,
   pub slack_id: String,
-  pub slack_team_id: String,
-  pub updated_at: DateTime,
-  pub points: i32
+  pub points: i32,
+  pub is_admin: bool,
+  pub updated_at: DateTime
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -35,7 +36,7 @@ impl Entity {
   /// # Parameters
   /// - `conn`: Reference to the PG connection.
   /// - `slack_id`: The Slack ID for the user.
-  /// - `slack_team_id`: The Slack Team ID for the user.
+  /// - `team_id`: The team ID for the user.
   ///
   /// # Returns
   /// This returns a `Result<Model>` that contains either an existing user record,
@@ -43,16 +44,15 @@ impl Entity {
   ///
   /// # Errors
   /// This function should only error in extreme cases due to PG constraint failures, network errors, etc.
-  pub async fn find_or_create<T>(conn: &DbPool, slack_id: T, slack_team_id: T) -> Result<Model>
+  pub async fn find_or_create<T>(conn: &DbPool, slack_id: T, team_id: Uuid) -> Result<Model>
     where T: Into<String> {
 
     let slack_id = slack_id.into();
-    let slack_team_id = slack_team_id.into();
 
     // Try to find an existing user
     let user = Entity::find()
       .filter(Column::SlackId.eq(&*slack_id))
-      .filter(Column::SlackTeamId.eq(&*slack_team_id))
+      .filter(Column::TeamId.eq(team_id))
       .one(conn)
       .await?;
 
@@ -61,7 +61,7 @@ impl Entity {
       None => {
         let new_user = ActiveModel {
           slack_id: Set(slack_id),
-          slack_team_id: Set(slack_team_id),
+          team_id: Set(team_id),
           ..Default::default()
         };
 

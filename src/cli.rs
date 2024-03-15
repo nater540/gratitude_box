@@ -29,6 +29,15 @@ pub struct Args {
 
   #[arg(long = "http-port", env = "GB_HTTP_PORT", default_value = "3000")]
   pub http_port: u16,
+
+  #[arg(long = "slack-client-id", env = "SLACK_CLIENT_ID")]
+  pub slack_client_id: String,
+
+  #[arg(long = "slack-client-secret", env = "SLACK_CLIENT_SECRET")]
+  pub slack_client_secret: String,
+
+  #[arg(long = "slack-signing-secret", env = "SLACK_SIGNING_SECRET")]
+  pub slack_signing_secret: String
 }
 
 pub fn parse() -> Args {

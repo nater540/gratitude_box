@@ -1,8 +1,7 @@
 use serde::{Serialize, Deserialize};
 use derive_builder::Builder;
-use std::borrow::Cow;
 
-use super::{Client, ClientError, Result};
+use super::{Client, Result};
 
 impl Client {
   /// Sends a message to a channel.

@@ -1,6 +1,5 @@
 pub mod signature;
 pub mod messages;
-pub mod client;
 pub mod http;
 pub mod verification_middleware;
 

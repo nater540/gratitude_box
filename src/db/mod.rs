@@ -8,7 +8,7 @@ pub mod test_helpers;
 #[cfg(test)]
 pub use test_helpers::*;
 
-pub mod models;
+pub mod entities;
 
 pub type DbPool = DatabaseConnection;
 

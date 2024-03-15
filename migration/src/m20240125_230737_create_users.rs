@@ -12,40 +12,49 @@ impl MigrationTrait for Migration {
     manager
       .create_table(
         Table::create()
-          .table(User::Table)
+          .table(Users::Table)
           .if_not_exists()
-          .col(ColumnDef::new(User::Id).uuid().not_null().primary_key())
-          .col(ColumnDef::new(User::SlackId).string().not_null())
-          .col(ColumnDef::new(User::SlackTeamId).string().not_null())
-          .col(ColumnDef::new(User::UpdatedAt).timestamp().not_null().default("now()"))
-          .col(ColumnDef::new(User::Points).integer().not_null().default("0"))
+          .col(ColumnDef::new(Users::Id).uuid().not_null().primary_key())
+          .col(ColumnDef::new(Users::TeamId).uuid().not_null())
+          .col(ColumnDef::new(Users::SlackId).string().not_null())
+          .col(ColumnDef::new(Users::Points).integer().not_null().default("0"))
+          .col(ColumnDef::new(Users::IsAdmin).boolean().not_null().default(false))
+          .col(ColumnDef::new(Users::UpdatedAt).timestamp().not_null().default("now()"))
           .to_owned()
       )
       .await?;
 
       manager.create_index(sea_query::Index::create()
         .if_not_exists()
-        .table(User::Table)
+        .table(Users::Table)
+        .name("idx_user_team_id")
+        .col(Users::TeamId)
+        .to_owned()
+      ).await?;
+
+      manager.create_index(sea_query::Index::create()
+        .if_not_exists()
+        .table(Users::Table)
         .name("idx_user_slack_id")
-        .col(User::SlackId)
-        .col(User::SlackTeamId)
+        .col(Users::SlackId)
         .to_owned()
       ).await
   }
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     manager
-      .drop_table(Table::drop().table(User::Table).to_owned())
+      .drop_table(Table::drop().table(Users::Table).to_owned())
       .await
   }
 }
 
 #[derive(DeriveIden)]
-enum User {
+enum Users {
   Table,
   Id,
+  TeamId,
   SlackId,
-  SlackTeamId,
-  UpdatedAt,
-  Points
+  Points,
+  IsAdmin,
+  UpdatedAt
 }
